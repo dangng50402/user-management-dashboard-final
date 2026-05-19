@@ -1,17 +1,22 @@
 import { userApi } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
-import { FilterStatus, SortField, SortOrder, User } from "@/types/user";
+import { CityFilter, SortField, SortOrder, User } from "@/types/user";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 interface UseUsersOptions {
   search: string;
-  filter: FilterStatus;
+  filter: CityFilter;
   sortField: SortField;
   sortOrder: SortOrder;
 }
 
-export function useUsers({ search, filter, sortField, sortOrder }: UseUsersOptions) {
+export function useUsers({
+  search,
+  filter,
+  sortField,
+  sortOrder,
+}: UseUsersOptions) {
   const {
     data: allUsers = [],
     isPending,
@@ -22,15 +27,18 @@ export function useUsers({ search, filter, sortField, sortOrder }: UseUsersOptio
     queryKey: queryKeys.users.all(),
     queryFn: userApi.getAll,
   });
+  
+  const cities = useMemo(
+    () => [...new Set(allUsers.map((u) => u.address.city))].sort(),
+    [allUsers]
+  );
 
   const filteredUsers = useMemo(() => {
     let result: User[] = [...allUsers];
 
-    // Filter theo FilterStatus
-    if (filter === "has-website") {
-      result = result.filter((u) => Boolean(u.website));
-    } else if (filter === "no-website") {
-      result = result.filter((u) => !u.website);
+    // 1. Filter theo city
+    if (filter !== "all") {
+      result = result.filter((u) => u.address.city === filter);
     }
 
     // Search theo name, email, username, company
@@ -66,6 +74,7 @@ export function useUsers({ search, filter, sortField, sortOrder }: UseUsersOptio
 
   return {
     users: filteredUsers,
+    cities,
     totalCount: allUsers.length,
     filteredCount: filteredUsers.length,
     isPending,

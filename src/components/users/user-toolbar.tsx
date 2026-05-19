@@ -12,13 +12,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDebounce } from "@/hooks/use-debounce";
-import type { FilterStatus, SortField, SortOrder } from "@/types/user";
+import type { CityFilter, SortField, SortOrder } from "@/types/user";
 
 interface UserToolbarProps {
   search: string;
   onSearchChange: (v: string) => void;
-  filter: FilterStatus;
-  onFilterChange: (v: FilterStatus) => void;
+  cities: string[];
+  filter: CityFilter;
+  onFilterChange: (v: CityFilter) => void;
   sortField: SortField;
   onSortFieldChange: (v: SortField) => void;
   sortOrder: SortOrder;
@@ -31,6 +32,7 @@ interface UserToolbarProps {
 export const UserToolbar = memo(function UserToolbar({
   search,
   onSearchChange,
+  cities,
   filter,
   onFilterChange,
   sortField,
@@ -49,8 +51,8 @@ export const UserToolbar = memo(function UserToolbar({
     if (debouncedValue !== search) {
       onSearchChange(debouncedValue);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedValue]); 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedValue]);
 
   return (
     <div className="space-y-3">
@@ -65,18 +67,18 @@ export const UserToolbar = memo(function UserToolbar({
           />
         </div>
 
-        <Select
-          value={filter}
-          onValueChange={(v) => onFilterChange(v as FilterStatus)}
-        >
+        <Select value={filter} onValueChange={onFilterChange}>
           <SelectTrigger className="w-44">
             <SlidersHorizontal className="mr-2 h-4 w-4" />
-            <SelectValue />
+            <SelectValue placeholder="Lọc theo thành phố" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tất cả</SelectItem>
-            <SelectItem value="has-website">Có website</SelectItem>
-            <SelectItem value="no-website">Không có website</SelectItem>
+            {cities.map((city) => (
+              <SelectItem key={city} value={city}>
+                {city}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 

@@ -1,16 +1,15 @@
 import { useCallback } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
-import type { FilterStatus, SortField, SortOrder } from "@/types/user"
+import type { SortField, SortOrder } from "@/types/user"
 
-const VALID_STATUS = ["all", "has-website", "no-website"] as const
-const VALID_SORT   = ["name", "email", "company"] as const
-const VALID_ORDER  = ["asc", "desc"] as const
+const VALID_SORT  = ["name", "email", "company"] as const
+const VALID_ORDER = ["asc", "desc"] as const
 
 const DEFAULTS = {
-  status: "all"  as FilterStatus,
-  sort:   "name" as SortField,
-  order:  "asc"  as SortOrder,
-  page:   1,
+  city:  "all",
+  sort:  "name" as SortField,
+  order: "asc"  as SortOrder,
+  page:  1,
 } as const
 
 function parseEnum<T extends string>(
@@ -34,11 +33,12 @@ export function useTableQueryState() {
   const pathname     = usePathname()
   const searchParams = useSearchParams()
 
-  const query  = searchParams.get("q") ?? ""
-  const status = parseEnum(searchParams.get("status"), VALID_STATUS, DEFAULTS.status)
-  const sort   = parseEnum(searchParams.get("sort"),   VALID_SORT,   DEFAULTS.sort)
-  const order  = parseEnum(searchParams.get("order"),  VALID_ORDER,  DEFAULTS.order)
-  const page   = parsePositiveInt(searchParams.get("page"), DEFAULTS.page)
+  // Đọc và parse từ URL
+  const query = searchParams.get("q") ?? ""
+  const city  = searchParams.get("city") ?? DEFAULTS.city  // city filter
+  const sort  = parseEnum(searchParams.get("sort"),  VALID_SORT,  DEFAULTS.sort)
+  const order = parseEnum(searchParams.get("order"), VALID_ORDER, DEFAULTS.order)
+  const page  = parsePositiveInt(searchParams.get("page"), DEFAULTS.page)
 
   const buildParams = useCallback(
     (overrides: Record<string, string | null>) => {
@@ -62,7 +62,6 @@ export function useTableQueryState() {
     [router, pathname]
   )
 
-  // Helper — chỉ navigate nếu URL thực sự thay đổi
   const navigateIfChanged = useCallback(
     (newParams: URLSearchParams) => {
       if (newParams.toString() !== searchParams.toString()) {
@@ -79,10 +78,10 @@ export function useTableQueryState() {
     }))
   }, [buildParams, navigateIfChanged])
 
-  const setStatus = useCallback((value: FilterStatus) => {
+  const setCity = useCallback((value: string) => {
     navigateIfChanged(buildParams({
-      status: value === DEFAULTS.status ? null : value,
-      page:   "1",
+      city: value === DEFAULTS.city ? null : value,
+      page: "1",
     }))
   }, [buildParams, navigateIfChanged])
 
@@ -100,5 +99,5 @@ export function useTableQueryState() {
     }))
   }, [buildParams, navigateIfChanged])
 
-  return { query, status, sort, order, page, setQuery, setStatus, setSort, setPage }
+  return { query, city, sort, order, page, setQuery, setCity, setSort, setPage }
 }
