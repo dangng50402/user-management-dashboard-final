@@ -1,7 +1,7 @@
-// UserTable.tsx
 "use client";
 
 import { useState, memo, useCallback } from "react";
+import Link from "next/link";
 import {
   Pencil,
   Trash2,
@@ -42,7 +42,7 @@ interface UserTableProps {
   showActions?: boolean;
 }
 
-// ─── HighlightText (không đổi) ───────────────────────────────────────────────
+// ─── HighlightText ────────────────────────────────────────────────────────────
 function HighlightText({ text, query }: { text: string; query: string }) {
   if (!query.trim()) return <span>{text}</span>;
   const regex = new RegExp(
@@ -54,10 +54,7 @@ function HighlightText({ text, query }: { text: string; query: string }) {
     <span>
       {parts.map((part, i) =>
         regex.test(part) ? (
-          <mark
-            key={i}
-            className="bg-yellow-200 text-yellow-900 rounded px-0.5"
-          >
+          <mark key={i} className="bg-yellow-200 text-yellow-900 rounded px-0.5">
             {part}
           </mark>
         ) : (
@@ -68,7 +65,7 @@ function HighlightText({ text, query }: { text: string; query: string }) {
   );
 }
 
-// ─── UserRow — tách ra để memo hoạt động theo từng row ───────────────────────
+// ─── UserRow ──────────────────────────────────────────────────────────────────
 interface UserRowProps {
   user: User;
   search: string;
@@ -95,9 +92,14 @@ const UserRow = memo(function UserRow({
   );
 
   return (
-    <TableRow className={isOptimistic ? "opacity-50" : ""}>
+    <TableRow className={isOptimistic ? "opacity-50" : "hover:bg-muted/50"}>
+      {/* Cột 1: Link bọc avatar + name + email → navigate /users/[id] */}
       <TableCell>
-        <div className="flex items-center gap-3">
+        <Link
+          href={isOptimistic ? "#" : `/users/${user.id}`}
+          className="flex items-center gap-3"
+          tabIndex={isOptimistic ? -1 : 0}
+        >
           <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary flex-shrink-0">
             {user.name.charAt(0).toUpperCase()}
           </div>
@@ -109,8 +111,10 @@ const UserRow = memo(function UserRow({
               <HighlightText text={user.email} query={search} />
             </p>
           </div>
-        </div>
+        </Link>
       </TableCell>
+
+      {/* Cột 2: Phone + Website */}
       <TableCell className="hidden md:table-cell">
         <div className="space-y-1">
           {user.phone && (
@@ -127,6 +131,8 @@ const UserRow = memo(function UserRow({
           )}
         </div>
       </TableCell>
+
+      {/* Cột 3: Company + City */}
       <TableCell className="hidden lg:table-cell">
         <div>
           <p className="text-sm">
@@ -135,6 +141,8 @@ const UserRow = memo(function UserRow({
           <p className="text-xs text-muted-foreground">{user.address.city}</p>
         </div>
       </TableCell>
+
+      {/* Cột 4: Actions */}
       {showActions && (
         <TableCell className="text-right">
           {isOptimistic ? (
@@ -187,11 +195,10 @@ export function UserTable({
 }: UserTableProps) {
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
 
-  // useCallback ở đây để onEdit/onRequestDelete stable → UserRow không re-render
   const handleEdit = useCallback((user: User) => onEdit(user), [onEdit]);
   const handleRequestDelete = useCallback(
     (id: number) => setDeleteTargetId(id),
-    [] // setDeleteTargetId là stable, không cần deps
+    []
   );
   const handleConfirmDelete = useCallback(() => {
     if (deleteTargetId !== null) {
