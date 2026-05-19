@@ -63,6 +63,6 @@ export type UserListItem = Pick<User, "id" | "name" | "email" | "phone" | "websi
 
 export type SortField = "name" | "email" | "company";
 export type SortOrder = "asc" | "desc";
-export type FilterStatus = "all" | "has-website" | "no-website";
+export type CityFilter = string;
 
 
