@@ -48,6 +48,7 @@ export function UsersPageClient() {
 
   const handleDelete = useCallback(
     (id: number) => deleteMutation.mutate(id),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [deleteMutation.mutate]
   );
 
