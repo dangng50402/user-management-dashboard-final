@@ -18,16 +18,16 @@ const UserDialog = dynamic(
 );
 
 export function UsersPageClient() {
-  const { query, status, sort, order, setQuery, setStatus, setSort } =
+  const { query, city, sort, order, setQuery, setCity, setSort } =
     useTableQueryState();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
-  const { users, totalCount, filteredCount, isPending, isError, error } =
+  const { users,cities, totalCount, filteredCount, isPending, isError, error } =
     useUsers({
       search: query,   // query từ URL — UserToolbar đã debounce trước khi setQuery
-      filter: status,
+      filter: city,
       sortField: sort,
       sortOrder: order,
     });
@@ -65,7 +65,7 @@ export function UsersPageClient() {
               phone: values.phone,
               website: values.website,
               address: { ...editingUser.address, city: values.address.city },
-              company: editingUser.company, // form không có field company
+              company: editingUser.company,
             },
           },
           { onSuccess: () => setDialogOpen(false) }
@@ -107,9 +107,10 @@ export function UsersPageClient() {
 
       <UserToolbar
         search={query}
+        cities={cities}
         onSearchChange={setQuery}
-        filter={status}
-        onFilterChange={setStatus}
+        filter={city}
+        onFilterChange={setCity}
         sortField={sort}
         onSortFieldChange={handleSortFieldChange}
         sortOrder={order}
