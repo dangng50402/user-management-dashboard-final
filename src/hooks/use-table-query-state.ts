@@ -1,4 +1,3 @@
-
 import { useCallback } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import type { FilterStatus, SortField, SortOrder } from "@/types/user"
@@ -35,7 +34,6 @@ export function useTableQueryState() {
   const pathname     = usePathname()
   const searchParams = useSearchParams()
 
-  // Đọc và parse từ URL 
   const query  = searchParams.get("q") ?? ""
   const status = parseEnum(searchParams.get("status"), VALID_STATUS, DEFAULTS.status)
   const sort   = parseEnum(searchParams.get("sort"),   VALID_SORT,   DEFAULTS.sort)
@@ -64,35 +62,43 @@ export function useTableQueryState() {
     [router, pathname]
   )
 
-  // Setters — không có useEffect nào cả
+  // Helper — chỉ navigate nếu URL thực sự thay đổi
+  const navigateIfChanged = useCallback(
+    (newParams: URLSearchParams) => {
+      if (newParams.toString() !== searchParams.toString()) {
+        navigate(newParams)
+      }
+    },
+    [navigate, searchParams]
+  )
+
   const setQuery = useCallback((value: string) => {
-    navigate(buildParams({
+    navigateIfChanged(buildParams({
       q:    value || null,
       page: "1",
     }))
-  }, [buildParams, navigate])
+  }, [buildParams, navigateIfChanged])
 
   const setStatus = useCallback((value: FilterStatus) => {
-    navigate(buildParams({
+    navigateIfChanged(buildParams({
       status: value === DEFAULTS.status ? null : value,
       page:   "1",
     }))
-  }, [buildParams, navigate])
+  }, [buildParams, navigateIfChanged])
 
   const setSort = useCallback((field: SortField, newOrder: SortOrder) => {
-    navigate(buildParams({
+    navigateIfChanged(buildParams({
       sort:  field    === DEFAULTS.sort  ? null : field,
       order: newOrder === DEFAULTS.order ? null : newOrder,
       page:  "1",
     }))
-  }, [buildParams, navigate])
+  }, [buildParams, navigateIfChanged])
 
   const setPage = useCallback((newPage: number) => {
-    const params = buildParams({
-      page: newPage === 1 ? null : String(newPage)
-    })
-    router.replace(`${pathname}?${params.toString()}`)
-  }, [buildParams, router, pathname])
+    navigateIfChanged(buildParams({
+      page: newPage === 1 ? null : String(newPage),
+    }))
+  }, [buildParams, navigateIfChanged])
 
   return { query, status, sort, order, page, setQuery, setStatus, setSort, setPage }
 }

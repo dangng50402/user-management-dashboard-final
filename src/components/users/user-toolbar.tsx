@@ -46,14 +46,11 @@ export const UserToolbar = memo(function UserToolbar({
   const debouncedValue = useDebounce(inputValue, 400);
 
   useEffect(() => {
-    onSearchChange(debouncedValue);
-  }, [debouncedValue, onSearchChange]);
-
-  // Sync ngược lại nếu search từ URL thay đổi (vd: clear từ nơi khác)
-  useEffect(() => {
-    if (search !== inputValue) setInputValue(search);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
+    if (debouncedValue !== search) {
+      onSearchChange(debouncedValue);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedValue]); 
 
   return (
     <div className="space-y-3">
