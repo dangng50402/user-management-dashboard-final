@@ -1,59 +1,68 @@
-import { z } from "zod";
+export interface User {
+  id: number;
+  name: string;
+  username: string;
+  email: string;
+  phone: string;
+  website: string;
+  address: Address;
+  company: Company;
+}
 
-export const userFormSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Tên ít nhất 2 ký tự")
-    .max(50, "Tối đa 50 ký tự")
-    .trim(),
+export interface Geo {
+  lat: string;
+  lng: string;
+}
 
-  username: z
-    .string()
-    .min(3, "Username ít nhất 3 ký tự")
-    .max(20, "Tối đa 20 ký tự")
-    .regex(/^[a-zA-Z0-9_]+$/, "Chỉ dùng chữ, số và _"),
+export interface Address {
+  street: string;
+  suite: string;
+  city: string;
+  zipcode: string;
+  geo: Geo;
+}
 
-  email: z
-    .string()
-    .min(1, "Email là bắt buộc")
-    .toLowerCase()
-    .pipe(z.email("Email không hợp lệ")),
+export interface Company {
+  name: string;
+  catchPhrase: string;
+  bs: string;
+}
 
-  phone: z
-    .string()
-    .min(1, "Số điện thoại là bắt buộc")
-    .regex(/^\+?[\d\s\-().]{7,20}$/, "Số điện thoại không hợp lệ"),
+export interface Post {
+    userId: number;
+    id: number;
+    title: string;
+    body: string;
+}
+  
+export interface Album {
+    userId: number;
+    id: number;
+    title: string;
+}
 
-  // Không dùng z.url() vì JSONPlaceholder trả về "hildegard.org" không có https://
-  website: z
-    .string()
-    .min(1, "Website là bắt buộc"),
-
-  address: z.object({
-    city: z
-      .string()
-      .min(1, "Thành phố là bắt buộc")
-      .max(50, "Tối đa 50 ký tự"),
-  }),
-});
-
-export type UserFormValues = z.infer<typeof userFormSchema>;
-
-export const userFormDefaultValues: UserFormValues = {
-  name: "",
-  username: "",
-  email: "",
-  phone: "",
-  website: "",
+export interface UserFormData {
+  name: string;
+  username: string;
+  email: string;
+  phone: string;
+  website: string;
   address: {
-    city: "",
-  },
+    city: string;
+  };
+}
+
+export type CreateUserInput = UserFormData;
+
+export type UpdateUserInput = Pick<User, "id"> & Partial<UserFormData>;
+
+export type UserListItem = Pick<User, "id" | "name" | "email" | "phone" | "website"> & {
+  address: Pick<Address, "city">;
+  company: Pick<Company, "name">;
 };
 
-// Login schema — tách riêng, không liên quan đến userFormSchema
-export const loginSchema = z.object({
-  name: z.string().min(2, "Tên ít nhất 2 ký tự"),
-  email: z.email("Email không hợp lệ"),
-});
+export type SortField = "name" | "email" | "company";
+export type SortOrder = "asc" | "desc";
+export type FilterStatus = "all" | "has-website" | "no-website";
 
-export type LoginFormValues = z.infer<typeof loginSchema>;
+
