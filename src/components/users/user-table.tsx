@@ -9,6 +9,7 @@ import {
   Globe,
   Phone,
   Users,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +32,7 @@ import {
 import type { User } from "@/types/user";
 import { EmptyState } from "../ui/empty-state";
 import { ConfirmDialog } from "../ui/confirm-dialog";
+
 
 interface UserTableProps {
   users: User[];
@@ -83,9 +85,11 @@ const UserRow = memo(function UserRow({
   onEdit,
   onRequestDelete,
 }: UserRowProps) {
+
   const isOptimistic = user.id < 0;
 
   const handleEdit = useCallback(() => onEdit(user), [onEdit, user]);
+
   const handleRequestDelete = useCallback(
     () => onRequestDelete(user.id),
     [onRequestDelete, user.id]
@@ -162,6 +166,14 @@ const UserRow = memo(function UserRow({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link href={`/users/${user.id}`}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Xem chi tiết
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleEdit}>
                   <Pencil className="mr-2 h-4 w-4" />
                   Chỉnh sửa
