@@ -11,26 +11,36 @@ import { UserTable } from "@/components/users/user-table";
 import dynamic from "next/dynamic";
 import type { UserFormValues } from "@/lib/schemas";
 import type { User, SortField, SortOrder } from "@/types/user";
+import { Button } from "../ui/button";
 
 const UserDialog = dynamic(
   () => import("@/components/users/user-dialog").then((m) => m.UserDialog),
-  { ssr: false }
+  { ssr: false },
 );
 
 export function UsersPageClient() {
-  const { query, city, sort, order, setQuery, setCity, setSort } =
+  const { query, city, sort, order, page,setPage, setQuery, setCity, setSort } =
     useTableQueryState();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
-  const { users,cities, totalCount, filteredCount, isPending, isError, error } =
-    useUsers({
-      search: query,   // query từ URL — UserToolbar đã debounce trước khi setQuery
-      filter: city,
-      sortField: sort,
-      sortOrder: order,
-    });
+  const {
+    users,
+    cities,
+    totalCount,
+    filteredCount,
+    totalPages,
+    isPending,
+    isError,
+    error,
+  } = useUsers({
+    search: query, // query từ URL — UserToolbar đã debounce trước khi setQuery
+    filter: city,
+    sortField: sort,
+    sortOrder: order,
+    page,
+  });
 
   const createMutation = useCreateUser();
   const updateMutation = useUpdateUser();
@@ -49,7 +59,7 @@ export function UsersPageClient() {
   const handleDelete = useCallback(
     (id: number) => deleteMutation.mutate(id),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [deleteMutation.mutate]
+    [deleteMutation.mutate],
   );
 
   const handleDialogSubmit = useCallback(
@@ -68,7 +78,7 @@ export function UsersPageClient() {
               company: editingUser.company,
             },
           },
-          { onSuccess: () => setDialogOpen(false) }
+          { onSuccess: () => setDialogOpen(false) },
         );
       } else {
         createMutation.mutate(
@@ -80,21 +90,21 @@ export function UsersPageClient() {
             website: values.website,
             address: { city: values.address.city },
           },
-          { onSuccess: () => setDialogOpen(false) }
+          { onSuccess: () => setDialogOpen(false) },
         );
       }
     },
-    [editingUser, updateMutation, createMutation]
+    [editingUser, updateMutation, createMutation],
   );
 
   const handleSortFieldChange = useCallback(
     (f: SortField) => setSort(f, order),
-    [setSort, order]
+    [setSort, order],
   );
 
   const handleSortOrderChange = useCallback(
     (o: SortOrder) => setSort(sort, o),
-    [setSort, sort]
+    [setSort, sort],
   );
 
   return (
@@ -129,6 +139,42 @@ export function UsersPageClient() {
         search={query}
         showActions
       />
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page <= 1}
+            onClick={() => setPage(page - 1)}
+          >
+            ← Trước
+          </Button>
+
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <Button
+                key={i}
+                variant={page === i + 1 ? "default" : "outline"}
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={() => setPage(i + 1)}
+              >
+                {i + 1}
+              </Button>
+            ))}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page >= totalPages}
+            onClick={() => setPage(page + 1)}
+          >
+            Sau →
+          </Button>
+        </div>
+      )}
 
       <UserDialog
         open={dialogOpen}
