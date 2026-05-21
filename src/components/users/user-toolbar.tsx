@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState, useEffect } from "react";
+import { memo, useState, useEffect, useRef } from "react";
 import { Search, SlidersHorizontal, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -47,12 +47,16 @@ export const UserToolbar = memo(function UserToolbar({
   const [inputValue, setInputValue] = useState(search);
   const debouncedValue = useDebounce(inputValue, 400);
 
+  const onSearchChangeRef = useRef(onSearchChange);
+  useEffect(() => {
+    onSearchChangeRef.current = onSearchChange;
+  }, [onSearchChange]);
+
   useEffect(() => {
     if (debouncedValue !== search) {
-      onSearchChange(debouncedValue);
+      onSearchChangeRef.current(debouncedValue);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedValue]);
+  }, [debouncedValue, search]);
 
   return (
     <div className="space-y-3">
