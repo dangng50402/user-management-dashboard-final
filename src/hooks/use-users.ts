@@ -4,11 +4,14 @@ import { CityFilter, SortField, SortOrder, User } from "@/types/user";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
+const PAGE_SIZE = 5;
+
 interface UseUsersOptions {
   search: string;
   filter: CityFilter;
   sortField: SortField;
   sortOrder: SortOrder;
+  page: number;
 }
 
 export function useUsers({
@@ -16,6 +19,7 @@ export function useUsers({
   filter,
   sortField,
   sortOrder,
+  page,
 }: UseUsersOptions) {
   const {
     data: allUsers = [],
@@ -27,10 +31,10 @@ export function useUsers({
     queryKey: queryKeys.users.all(),
     queryFn: userApi.getAll,
   });
-  
+
   const cities = useMemo(
     () => [...new Set(allUsers.map((u) => u.address.city))].sort(),
-    [allUsers]
+    [allUsers],
   );
 
   const filteredUsers = useMemo(() => {
@@ -49,7 +53,7 @@ export function useUsers({
           u.name.toLowerCase().includes(q) ||
           u.email.toLowerCase().includes(q) ||
           u.username.toLowerCase().includes(q) ||
-          u.company.name.toLowerCase().includes(q)
+          u.company.name.toLowerCase().includes(q),
       );
     }
 
@@ -72,11 +76,19 @@ export function useUsers({
     return result;
   }, [allUsers, search, filter, sortField, sortOrder]);
 
+  const totalFiltered = filteredUsers.length;
+  const totalPages = Math.ceil(totalFiltered / PAGE_SIZE);
+  const paginatedUsers = filteredUsers.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE,
+  );
+
   return {
-    users: filteredUsers,
+    users: paginatedUsers,
     cities,
     totalCount: allUsers.length,
     filteredCount: filteredUsers.length,
+    totalPages,
     isPending,
     isError,
     error,

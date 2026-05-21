@@ -29,8 +29,8 @@ export function ConfirmDialog({
   onOpenChange,
   title,
   description,
-  confirmText = "Xac nhan",
-  cancelText = "Huy",
+  confirmText = "Xác Nhận",
+  cancelText = "Huỷ",
   variant = "default",
   onConfirm,
   loading = false,
@@ -61,8 +61,6 @@ export function ConfirmDialog({
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
             {confirmText}
           </AlertDialogAction>
-
-          <AlertDialogAction />
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

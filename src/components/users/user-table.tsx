@@ -207,7 +207,7 @@ export function UserTable({
 }: UserTableProps) {
   const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
 
-  const handleEdit = useCallback((user: User) => onEdit(user), [onEdit]);
+  // const handleEdit = useCallback((user: User) => onEdit(user), [onEdit]);
   const handleRequestDelete = useCallback(
     (id: number) => setDeleteTargetId(id),
     []
@@ -265,7 +265,7 @@ export function UserTable({
                 search={search}
                 showActions={showActions ?? false}
                 isDeleting={isDeleting}
-                onEdit={handleEdit}
+                onEdit={onEdit}
                 onRequestDelete={handleRequestDelete}
               />
             ))}
